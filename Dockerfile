@@ -28,6 +28,8 @@ ARG VAULT_VERSION=a868ea02ea78b4a0eb8656664cf8d29f9fdab8c2
 ENV VAULT_VERSION=$VAULT_VERSION
 ENV VAULT_FOLDER=bw_clients
 ENV CHECKOUT_TAGS=false
+# Increase V8 heap to prevent OOM during Webpack compilation
+ENV NODE_OPTIONS="--max-old-space-size=6144"
 
 RUN mkdir /bw_web_builds
 WORKDIR /bw_web_builds
