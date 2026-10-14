@@ -20,6 +20,12 @@ trap 'handle_error $LINENO $?' ERR
 # shellcheck source=checkout_web_vault.sh
 . "${BASEDIR}/checkout_web_vault.sh"
 
+# Apply drag-and-drop patches (Realmagnum)
+if [ -f "${BASEDIR}/scripts/apply_dnd_patch.sh" ]; then
+    echo "Running Realmagnum DnD patch..."
+    . "${BASEDIR}/scripts/apply_dnd_patch.sh" || echo "WARNING: DnD patch failed, continuing..."
+fi
+
 # Build the web-vault using node and npm
 # shellcheck source=build_web_vault.sh
 . "${BASEDIR}/build_web_vault.sh"
