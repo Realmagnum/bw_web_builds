@@ -33,10 +33,12 @@ RUN mkdir /bw_web_builds
 WORKDIR /bw_web_builds
 
 COPY scripts ./scripts
+COPY patches-dnd ./patches-dnd
 # Use a glob pattern here so builds will continue even if the `.build_env` does not exists
 COPY .build_env* ./
 
 RUN ./scripts/checkout_web_vault.sh
+RUN VAULT_FOLDER="${VAULT_FOLDER}" ./scripts/apply_dnd_patch.sh
 RUN ./scripts/build_web_vault.sh
 RUN mv "${VAULT_FOLDER}/apps/web/build" ./web-vault
 

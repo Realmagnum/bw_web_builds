@@ -5,24 +5,27 @@ BASEDIR=$(RL=$(readlink -n "$0"); SP="${RL:-$0}"; dirname "$(cd "$(dirname "${SP
 # Apply drag-and-drop patches to web-vault after checkout
 echo "Applying drag-and-drop patches..."
 
-VAULT_DIR="${BASEDIR}/web-vault"
-PATCHES_DIR="${BASEDIR}/patches-dragdrop"
+REPO_DIR="$(cd "${BASEDIR}/.." && pwd)"
+VAULT_DIR="${REPO_DIR}/${VAULT_FOLDER:-web-vault}"
+PATCHES_DIR="${REPO_DIR}/patches-dnd"
 
 if [ ! -d "${VAULT_DIR}" ]; then
     echo "ERROR: ${VAULT_DIR} not found. Run checkout first."
     exit 1
 fi
+if [ ! -d "${PATCHES_DIR}" ]; then
+    echo "ERROR: ${PATCHES_DIR} not found."
+    exit 1
+fi
 
-# Patch files will be applied using simple file copy from patches-dragdrop/
-for src in "${PATCHES_DIR}"/*; do
-    filename=$(basename "$src")
-    rel_path=$(echo "$filename" | sed 's|.*_||')
-    if [ -f "$src" ] && [ -n "$rel_path" ]; then
-        dst="${VAULT_DIR}/${rel_path}"
-        mkdir -p "$(dirname "$dst")"
-        cp -v "$src" "$dst"
-        echo "Applied: $rel_path"
-    fi
-done
+# Preserve repository-relative paths and fail if any expected source or destination is missing.
+while IFS= read -r -d '' src; do
+    rel_path="${src#"${PATCHES_DIR}"/}"
+    dst="${VAULT_DIR}/${rel_path}"
+    mkdir -p "$(dirname "$dst")"
+    cp -v -- "$src" "$dst"
+    cmp -s -- "$src" "$dst"
+    echo "Applied and verified: ${rel_path}"
+done < <(find "${PATCHES_DIR}" -type f -print0)
 
 echo "Drag-and-drop patches applied successfully!"
